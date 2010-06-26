@@ -16,11 +16,13 @@ let colors_name="ydream"
 if has("gui_running")
 	:hi Normal guifg=#E7E7E7 guibg=#262936
 	:hi Cursor guibg=Yellow
+	:hi CursorLine guibg=#353845
 	:hi Visual guibg=#2D498B gui=none
 	:hi Pmenu guifg=#333333 guibg=#E3E3E3
 	:hi PmenuSel guifg=#ffffff guibg=#0264A2
+	:hi PmenuSbar guibg=#E3E3E3
+	:hi PmenuThumb guifg=#C0C3D0
 	:hi MatchParen guibg=#336699 guifg=#dddddd
-	:hi CursorLine guibg=#393C49
 
 	:hi LineNr guifg=grey85 guibg=#606370
 	:hi VertSplit guibg=#E6E6E6 guifg=#666666 gui=none

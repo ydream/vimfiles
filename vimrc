@@ -115,7 +115,7 @@ nmap <silent><F2> :NERDTreeToggle<cr>
 
 " Most Recently Used (MRU)
 nmap <silent><F3> :call MRUToggle()<cr>
-imap <silent><F3> <esc>a:call MRUToggle()<cr>
+imap <silent><F3> <esc>:call MRUToggle()<cr>
 
 " NEOComplcache设置
 let g:NeoComplCache_EnableAtStartup = 1
@@ -172,8 +172,8 @@ if has("gui_macvim")
 	let macvim_skip_cmd_opt_movement=1
 	let macvim_hig_shift_movement=1
 
-	map <D-y> <C-y>
-	map <D-e> <C-e>
+	map <D-y> 3<C-y>
+	map <D-e> 3<C-e>
 	map <D-f> <C-f>
 	map <D-b> <C-b>
 	map <D-u> <C-u>
