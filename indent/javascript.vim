@@ -87,11 +87,15 @@ let b:blockCommentMiddleExtra = 1
 " brace/'{' on the previous line.
 
 let b:indentTrios = [
-            \ [ '(',  '',                      ')'  ],
-            \ [ '{',  '\(default:\|case.*:\)', '}'  ],
-            \ [ '\[', '',                      '\]' ]
+            \ [ '{',  '', '}'  ],
+            \ [ '\[', '', '\]' ]
 \]
 
+" let b:indentTrios = [
+"             \ [ '(',  '',                      ')'  ],
+"             \ [ '{',  '\(default:\|case.*:\)', '}'  ],
+"             \ [ '\[', '',                      '\]' ]
+" \]
 
 "
 " Line continuations.  Lines that are continued on the next line are

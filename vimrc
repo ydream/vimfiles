@@ -35,10 +35,10 @@ set shiftwidth=4
 set linespace=2
 set scrolloff=2
 set nowrap
-"set cursorline
+set cursorline
 set backspace=indent,eol,start
 set whichwrap=b,s,h,l,<,>,[,]
-set matchpairs=(:),{:},[:],<:>
+set matchpairs=(:),{:},[:]
 set shortmess=atI
 set wildmenu
 
@@ -59,8 +59,8 @@ setlocal foldlevel=1
 set nobackup
 set writebackup
 
-set showmatch
-set matchtime=2
+" set showmatch
+" set matchtime=2
 
 let mapleader=","
 let javascript_enable_domhtmlcss=1
@@ -92,8 +92,6 @@ inoremap { {}<esc>i
 inoremap } <c-r>=ClosePair('}')<cr>
 inoremap [ []<esc>i
 inoremap ] <c-r>=ClosePair(']')<cr>
-inoremap < <><esc>i
-inoremap > <c-r>=ClosePair('>')<cr>
 
 " 自动折叠
 nnoremap <silent><space> @=((foldclosed(line('.')) < 0) ? 'zc' : 'zo')<cr>
@@ -117,6 +115,7 @@ nmap <silent><F2> :NERDTreeToggle<cr>
 
 " Most Recently Used (MRU)
 nmap <silent><F3> :call MRUToggle()<cr>
+imap <silent><F3> <esc>a:call MRUToggle()<cr>
 
 " NEOComplcache设置
 let g:NeoComplCache_EnableAtStartup = 1
