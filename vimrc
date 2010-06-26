@@ -102,6 +102,7 @@ nmap <silent><F4> :vimgrep /<c-r>=expand("<cword>")<cr>/ %<cr>:copen<cr>
 
 " 开启/关闭Quickfix列表
 map <silent><F7> :call QuickfixToggle()<cr>
+imap <silent><F7> <esc>:call QuickfixToggle()<cr>
 
 """"""""""""""""""""""""""""""""
 " 插件设置
@@ -111,7 +112,9 @@ let NERDSpaceDelims=1       " 让注释符与语句之间留一个空格
 let NERDCompactSexyComs=1   " 多行注释时样子更好看
 
 " NERDTree设置
+let g:NERDTreeShowBookmarks = 1
 nmap <silent><F2> :NERDTreeToggle<cr>
+imap <silent><F2> <esc>:NERDTreeToggle<cr>
 
 " Most Recently Used (MRU)
 nmap <silent><F3> :call MRUToggle()<cr>
@@ -191,6 +194,8 @@ if has("gui_macvim")
 	imap <D-x> <C-x>
 	imap <D-n> <C-n>
 	imap <D-p> <C-p>
+	imap <D-u> <C-u>
+	imap <D-o> <C-o>
 	" 快速结束插入模式
 	imap <D-c> <C-c>
 endif

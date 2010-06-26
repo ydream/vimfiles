@@ -23,7 +23,8 @@ if has("gui_running")
 	:hi PmenuSbar guibg=#E3E3E3
 	:hi PmenuThumb guifg=#C0C3D0
 	:hi MatchParen guibg=#336699 guifg=#dddddd
-
+	:hi Directory guifg=#9FBADF gui=bold
+	
 	:hi LineNr guifg=grey85 guibg=#606370
 	:hi VertSplit guibg=#E6E6E6 guifg=#666666 gui=none
 	:hi Folded guifg=grey40 guibg=black
