@@ -44,7 +44,7 @@ if has("gui_running")
 	:hi Comment guifg=grey45
 	:hi CommentDoc guifg=grey45
 	:hi CommentDocTags guifg=grey45
-	:hi Conditional guifg=#99B5D9
+	:hi Conditional guifg=#FFE619
 	:hi Repeat guifg=#FFE619
 	:hi Constant guifg=#D4FF36
 	:hi Boolean guifg=#D4FF36
