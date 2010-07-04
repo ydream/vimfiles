@@ -10,42 +10,42 @@ if !exists('upAndDown_enable')
 	setlocal cpo&vim
 
 	if !hasmapto('<Plug>upAndDownUp')
-		nmap <unique> <silent> <S-Up> <Plug>upAndDownUp
+		nmap <unique> <silent> <M-Up> <Plug>upAndDownUp
 	endif
 
 	nnoremap <unique> <script> <Plug>upAndDownUp <SID>moveUp
 	nnoremap <SID>moveUp :<C-u>call <SID>moveUp()<CR>
 
 	if !hasmapto('<Plug>upAndDownDown')
-		nmap <unique> <silent> <S-Down> <Plug>upAndDownDown
+		nmap <unique> <silent> <M-Down> <Plug>upAndDownDown
 	endif
 
 	nnoremap <unique> <script> <Plug>upAndDownDown <SID>moveDown
 	nnoremap <SID>moveDown :<C-u>call <SID>moveDown()<CR>
 
 	if !hasmapto('<Plug>upAndDownInsertUp')
-		imap <unique> <silent> <S-Up> <Plug>upAndDownInsertUp
+		imap <unique> <silent> <M-Up> <Plug>upAndDownInsertUp
 	endif
 
 	inoremap <unique> <script> <Plug>upAndDownInsertUp <SID>moveInsertUp
 	inoremap <SID>moveInsertUp <C-o>:<C-u>call <SID>moveUp()<CR>
 
 	if !hasmapto('<Plug>upAndDownInsertDown')
-		imap <unique> <silent> <S-Down> <Plug>upAndDownInsertDown
+		imap <unique> <silent> <M-Down> <Plug>upAndDownInsertDown
 	endif
 
 	inoremap <unique> <script> <Plug>upAndDownInsertDown <SID>moveInsertDown
 	inoremap <SID>moveInsertDown <C-o>:<C-u>call <SID>moveDown()<CR>
 
 	if !hasmapto('<Plug>upAndDownVisualUp')
-		vmap <unique> <silent> <S-Up> <Plug>upAndDownVisualUp
+		vmap <unique> <silent> <M-Up> <Plug>upAndDownVisualUp
 	endif
 
 	vnoremap <unique> <script> <Plug>upAndDownVisualUp <SID>moveVisualUp
 	vnoremap <SID>moveVisualUp :<C-u>call <SID>moveVisualUp()<CR>
 
 	if !hasmapto('<Plug>upAndDownVisualDown')
-		vmap <unique> <silent> <S-Down> <Plug>upAndDownVisualDown
+		vmap <unique> <silent> <M-Down> <Plug>upAndDownVisualDown
 	endif
 
 	vnoremap <unique> <script> <Plug>upAndDownVisualDown <SID>moveVisualDown
