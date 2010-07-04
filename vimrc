@@ -86,12 +86,15 @@ nmap <s-tab> v<
 vmap <s-tab> <gv
 
 " 自动补全括号
-inoremap ( ()<esc>i
-inoremap ) <c-r>=ClosePair(')')<cr>
-inoremap { {}<esc>i
-inoremap } <c-r>=ClosePair('}')<cr>
-inoremap [ []<esc>i
-inoremap ] <c-r>=ClosePair(']')<cr>
+" inoremap ( ()<esc>i
+" inoremap ) <c-r>=ClosePair(')')<cr>
+" inoremap { {}<esc>i
+" inoremap } <c-r>=ClosePair('}')<cr>
+" inoremap [ []<esc>i
+" inoremap ] <c-r>=ClosePair(']')<cr>
+vnoremap <leader>" "zdi"<c-r>z"
+vnoremap <leader>' "zdi'<c-r>z'
+vnoremap <leader>( "zdi(<c-r>z)
 
 " 自动折叠
 nnoremap <silent><space> @=((foldclosed(line('.')) < 0) ? 'zc' : 'zo')<cr>
