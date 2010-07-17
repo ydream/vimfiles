@@ -124,21 +124,21 @@ nmap <silent><F3> :call MRUToggle()<cr>
 imap <silent><F3> <esc>:call MRUToggle()<cr>
 
 " NEOComplcache设置
-let g:NeoComplCache_EnableAtStartup = 1
-"let g:NeoComplCache_SnippetsDir = $HOME.'/.vim/snippets'
-"let g:NeoComplCache_DisableAutoComplete = 1
-let g:NeoComplCache_SmartCase = 1
-let g:NeoComplCache_EnableCamelCaseCompletion = 1
-let g:NeoComplCache_EnableUnderbarCompletion = 1
-let g:NeoComplCache_ManualCompletionStartLength = 2
-let g:NeoComplCache_MinSyntaxLength = 3
-let g:NeoComplCache_MinKeywordLength = 3
-"let g:NeoComplCache_MaxList = 9
+let g:neocomplcache_enable_at_startup = 1
+"let g:neocomplcache_snippets_dir = $HOME.'/.vim/snippets'
+"let g:neocomplcache_disable_auto_complete = 1
+let g:neocomplcache_enable_smart_case = 1
+let g:neocomplcache_enable_camel_case_completion = 1
+let g:neocomplcache_enable_underbar_completion = 1
+let g:neocomplcache_manual_completion_start_length = 2
+let g:neocomplcache_min_syntax_length = 3
+let g:neocomplcache_min_keyword_length = 3
+"let g:neocomplcache_max_list = 9
 
-if !exists('g:NeoComplCache_OmniPatterns')
-	let g:NeoComplCache_OmniPatterns = {}
+if !exists('g:neocomplcache_omni_patterns')
+	let g:neocomplcache_omni_patterns = {}
 endif
-let g:NeoComplCache_OmniPatterns['css'] = '\v^\s+\w+|\w+[):;]?\s+|[@!]'
+let g:neocomplcache_omni_patterns['css'] = '\v^\s+\w+|\w+[):;]?\s+|[@!]'
 
 inoremap <expr><cr> pumvisible() ? "\<C-y>" : (StructStart() ? "\<cr>\<esc>kA\<cr>" : "\<cr>")
 inoremap <expr><tab> pumvisible() ? "\<C-n>" : "\<tab>" 
