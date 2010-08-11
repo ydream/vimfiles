@@ -103,6 +103,10 @@ nnoremap <silent><space> @=((foldclosed(line('.')) < 0) ? 'zc' : 'zo')<cr>
 map <leader>/ :SearchList 
 nmap <silent><F4> :vimgrep /<c-r>=expand("<cword>")<cr>/ %<cr>:copen<cr>
 
+" 打开/关闭横向滚动条
+map <silent><F6> :call ScrollBarToggle()<cr>
+imap <silent><F6> <esc>:call ScrollBarToggle()<cr>
+
 " 开启/关闭Quickfix列表
 map <silent><F7> :call QuickfixToggle()<cr>
 imap <silent><F7> <esc>:call QuickfixToggle()<cr>
@@ -266,6 +270,20 @@ function! MRUToggle()
 		execute ":close"
 	else
 		execute ":MRU"
+	endif
+endfunction
+
+" 打开/关闭横向滚动条
+function! ScrollBarToggle()
+	redir => se_rst
+		execute ":silent se go"
+	redir END
+	if match(se_rst, "b") == -1
+		set nowrap
+		set guioptions+=b
+	else
+		set wrap
+		set guioptions-=b
 	endif
 endfunction
 
