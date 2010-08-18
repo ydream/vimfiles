@@ -103,6 +103,10 @@ nnoremap <silent><space> @=((foldclosed(line('.')) < 0) ? 'zc' : 'zo')<cr>
 map <leader>/ :SearchList 
 nmap <silent><F4> :vimgrep /<c-r>=expand("<cword>")<cr>/ %<cr>:copen<cr>
 
+" 打开/关闭相对行号
+map <silent><F5> :call RelativeNumberToggle()<cr>
+imap <silent><F5> <esc>:call RelativeNumberToggle()<cr>
+
 " 打开/关闭横向滚动条
 map <silent><F6> :call ScrollBarToggle()<cr>
 imap <silent><F6> <esc>:call ScrollBarToggle()<cr>
@@ -177,6 +181,7 @@ if has("gui_macvim")
 	set transparency=5
 	set guitablabel=%t
 	set guioptions-=T
+	set guifont=Menlo:h12
 	set fillchars=vert:\ ,stl:\ ,stlnc:\ 
 
 	let macvim_skip_cmd_opt_movement=1
@@ -284,6 +289,18 @@ function! ScrollBarToggle()
 	else
 		set wrap
 		set guioptions-=b
+	endif
+endfunction
+
+" 打开/关闭相对行号
+function! RelativeNumberToggle()
+	redir => rnu_rst
+		execute ":silent se"
+	redir END
+	if match(rnu_rst, "relativenumber") == -1
+		set rnu
+	else
+		set nu
 	endif
 endfunction
 
