@@ -80,7 +80,7 @@ map <leader>w <c-w>
 " 打开当前文件所在文件夹
 map <silent><leader>d :silent !open .<cr>
 
-map <leader>. :colorscheme desert<cr>:colorscheme ydream<cru
+map <leader>. :colorscheme desert<cr>:colorscheme ydream<cr>
 
 " 代码缩进
 nmap <tab> v>
