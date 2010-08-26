@@ -3512,10 +3512,12 @@ function! s:activateNode(forceKeepWindowOpen)
     let treenode = s:TreeFileNode.GetSelected()
     if treenode != {}
         call treenode.activate(a:forceKeepWindowOpen)
+        call treenode.path.changeToDir()
     else
         let bookmark = s:Bookmark.GetSelected()
         if !empty(bookmark)
             call bookmark.activate()
+            call bookmark.path.changeToDir()
         endif
     endif
 endfunction

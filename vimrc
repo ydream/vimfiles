@@ -79,6 +79,8 @@ map <leader>w <c-w>
 
 " 打开当前文件所在文件夹
 map <silent><leader>d :silent !open .<cr>
+" 查找替换界面
+map <silent><leader>h :promptrepl<cr>
 
 map <leader>. :colorscheme desert<cr>:colorscheme ydream<cr>
 
@@ -104,7 +106,8 @@ nnoremap <silent><space> @=((foldclosed(line('.')) < 0) ? 'zc' : 'zo')<cr>
 
 " 列表搜索
 map <leader>/ :SearchList 
-nmap <silent><F4> :vimgrep /<c-r>=expand("<cword>")<cr>/ %<cr>:copen<cr>
+nmap <silent><F4> :call QuickSearchList(0)<cr>
+vmap <silent><F4> :call QuickSearchList(1)<cr>
 
 " 打开/关闭相对行号
 map <silent><F5> :call RelativeNumberToggle()<cr>
@@ -127,6 +130,8 @@ let NERDCompactSexyComs=1   " 多行注释时样子更好看
 
 " NERDTree设置
 let g:NERDTreeShowBookmarks = 1
+let g:NERDTreeQuitOnOpen = 1
+let g:NERDTreeChDirMode = 2
 nmap <silent><F2> :NERDTreeToggle<cr>
 imap <silent><F2> <esc>:NERDTreeToggle<cr>
 
@@ -223,7 +228,7 @@ autocmd! bufwritepost vimrc source ~/.vim/vimrc
 "autocmd InsertEnter * se cul
 autocmd BufRead,BufNewFile *.css set ft=css syntax=css3
 
-command! -nargs=+ SearchList call SearchList(<f-args>)
+command! -nargs=+ SearchList call QuickSearchList(0, <f-args>)
 
 "---------------------------------------------------------------
 endif
@@ -253,9 +258,26 @@ function! StructStart()
 endfunction
 
 " 列表搜索快捷函数
-function! SearchList(key)
-	execute ':vimgrep /' . a:key . '/ %'
-	execute ':copen'
+function! QuickSearchList(visual, ...)
+	if empty(expand("%"))
+		return 0
+	endif
+	if a:visual
+		let l:saved_reg = @"
+		execute "normal! vgvy"
+		let	l:pattern = escape(@", '\\/.*$^~[]')
+		let l:pattern = substitute(l:pattern, "\n$", "", "")
+		let @" = l:saved_reg
+	else
+		if exists("a:1")
+			let l:pattern = a:1
+		else
+			let l:pattern = expand("<cword>")
+		endif
+	endif
+	execute ":vimgrep /" . l:pattern . "/ %"
+	execute ":copen"
+	let @/ = l:pattern
 endfunction
 
 " 打开/关闭Quickfix列表
