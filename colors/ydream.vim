@@ -33,7 +33,7 @@ if has("gui_running")
 	:hi IncSearch guibg=black guifg=yellow 
 	:hi ModeMsg guifg=goldenrod
 	:hi MoreMsg guifg=Green guibg=black
-	:hi NonText guifg=RoyalBlue guibg=#151825
+	:hi NonText guifg=#484C59 guibg=#151825
 	:hi Question guifg=springgreen
 	:hi Search guibg=#0099ff guifg=White
 	:hi SpecialKey guifg=#D3FE36
@@ -51,7 +51,7 @@ if has("gui_running")
 	:hi Number guifg=#D4FF36
 	:hi Special guifg=#99B5D9
 	:hi Identifier guifg=#99B5D9
-	:hi Include guifg=red
+	:hi Include guifg=#CC1D20
 	:hi PreProc guifg=grey
 	:hi Operator guifg=#99B5D9 gui=bold
 	:hi Define guifg=#FFE619 gui=bold
