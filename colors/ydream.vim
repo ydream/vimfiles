@@ -33,7 +33,7 @@ if has("gui_running")
 	:hi IncSearch guibg=black guifg=yellow 
 	:hi ModeMsg guifg=goldenrod
 	:hi MoreMsg guifg=Green guibg=black
-	:hi NonText guifg=#484C59 guibg=#151825
+	:hi NonText guifg=#404250 guibg=#151825
 	:hi Question guifg=springgreen
 	:hi Search guibg=#0099ff guifg=White
 	:hi SpecialKey guifg=#D3FE36
