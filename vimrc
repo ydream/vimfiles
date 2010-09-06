@@ -220,6 +220,7 @@ if has("gui_macvim")
 	imap <D-o> <C-o>
 	" 快速结束插入模式
 	imap <D-c> <C-c>
+	imap <D-[> <C-[>
 endif
 
 """"""""""""""""""""""""""""""""
