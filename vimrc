@@ -175,12 +175,14 @@ let showmarks_ignore_type = "hqm"
 "<Leader>mm   - 在当前行打一个标记，使用下一个可用的标记名
 
 " FuzzyFinder设置
-nmap <leader>fb :FufBuffer<cr>
 nmap <leader>ff :FufFile<cr>
 nmap <leader>fd :FufDir<cr>
 nmap <leader>fa :FufBookmark<cr>
 nmap <leader>fm :FufAddBookmark<cr>
 nmap <leader>fc :FufChangeList<cr>
+nmap <leader>fn :tabe<cr>:FufFile<cr>
+nmap <leader>fb :tabe<cr>:FufBookmark<cr>
+"nmap <leader>fb :FufBuffer<cr>
 "noremap <silent><C-]> :FufTagWithCursorWord!<CR>
 
 " Tasklis设置
