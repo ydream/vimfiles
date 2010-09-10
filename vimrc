@@ -98,9 +98,10 @@ vmap <s-tab> <gv
 " inoremap [ []<esc>i
 " inoremap ] <c-r>=ClosePair(']')<cr>
 inoremap <silent><space> <c-r>=AutoSpace()<cr>
-vnoremap <leader>" "zda"<c-r>z"
-vnoremap <leader>' "zda'<c-r>z'
-vnoremap <leader>( "zda(<c-r>z)
+vnoremap <leader>' "zd@=((col('.') == col('$') - 1) ? "a'<c-r>z'" : "i'<c-r>z'")<cr><esc>
+vnoremap <leader>" "zd@=((col('.') == col('$') - 1) ? 'a"<c-r>z"' : 'i"<c-r>z"')<cr><esc>
+vnoremap <leader>( "zd@=((col('.') == col('$') - 1) ? 'a(<c-r>z)' : 'i(<c-r>z)')<cr><esc>
+vnoremap <leader>{ "zd@=((col('.') == col('$') - 1) ? 'a{<c-r>z}' : 'i{<c-r>z}')<cr><esc>
 
 " 自动折叠
 nnoremap <silent><space> @=((foldclosed(line('.')) < 0) ? 'zc' : 'zo')<cr>
