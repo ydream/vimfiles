@@ -10,7 +10,7 @@
 set nocompatible
 set ruler
 set history=500
-set report=0
+" set report=0
 
 set ignorecase smartcase
 set incsearch
@@ -97,9 +97,10 @@ vmap <s-tab> <gv
 " inoremap } <c-r>=ClosePair('}')<cr>
 " inoremap [ []<esc>i
 " inoremap ] <c-r>=ClosePair(']')<cr>
-vnoremap <leader>" "zdi"<c-r>z"
-vnoremap <leader>' "zdi'<c-r>z'
-vnoremap <leader>( "zdi(<c-r>z)
+inoremap <silent><space> <c-r>=AutoSpace()<cr>
+vnoremap <leader>" "zda"<c-r>z"
+vnoremap <leader>' "zda'<c-r>z'
+vnoremap <leader>( "zda(<c-r>z)
 
 " 自动折叠
 nnoremap <silent><space> @=((foldclosed(line('.')) < 0) ? 'zc' : 'zo')<cr>
@@ -120,6 +121,8 @@ imap <silent><F6> <esc>:call ScrollBarToggle()<cr>
 " 开启/关闭Quickfix列表
 map <silent><F7> :call QuickfixToggle()<cr>
 imap <silent><F7> <esc>:call QuickfixToggle()<cr>
+
+map <silent><leader>zz :cclose<cr>:let @/=''<cr>
 
 """"""""""""""""""""""""""""""""
 " 插件设置
@@ -195,8 +198,10 @@ if has("gui_macvim")
 	let macvim_skip_cmd_opt_movement=1
 	let macvim_hig_shift_movement=1
 
-	map <D-j> 3j
-	map <D-k> 3k
+	map <D-L> gt
+	map <D-H> gT
+	map <D-j> 5j
+	map <D-k> 5k
 	map <D-y> 3<C-y>
 	map <D-e> 3<C-e>
 	map <D-f> <C-f>
@@ -246,6 +251,16 @@ function! ClosePair(char)
 		return "\<right>"
 	else
 		return a:char
+	endif
+endfunction
+
+" 大括号自动空格
+function! AutoSpace()
+	let line = getline('.')
+	if line[col('.') - 2] == '{' && line[col('.') - 1] == '}'
+		return "\<space>\<space>\<left>"
+	else
+		return "\<space>"
 	endif
 endfunction
 
