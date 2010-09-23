@@ -195,7 +195,7 @@ if has("gui_macvim")
 	set transparency=5
 	set guitablabel=%t
 	set guioptions-=T
-	set guifont=Menlo:h12
+	set guifont=Consolas:h12
 	set fillchars=vert:\ ,stl:\ ,stlnc:\ 
 
 	let macvim_skip_cmd_opt_movement=1
