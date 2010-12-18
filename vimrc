@@ -124,6 +124,7 @@ map <silent><F7> :call QuickfixToggle()<cr>
 imap <silent><F7> <esc>:call QuickfixToggle()<cr>
 
 map <silent><leader>z :cclose<cr>:let @/=''<cr>
+map <silent><F1> :cclose<cr>:let @/=''<cr>
 
 """"""""""""""""""""""""""""""""
 " 插件设置
