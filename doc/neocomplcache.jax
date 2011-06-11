@@ -1,6 +1,6 @@
 *neocomplcache.txt*	究極の自動補完環境
 
-Version: 5.1
+Version: 6.0
 Author : Shougo <Shougo.Matsu@gmail.com>
 License: MIT license  {{{
     Permission is hereby granted, free of charge, to any person obtaining
@@ -25,14 +25,17 @@ License: MIT license  {{{
 CONTENTS						*neocomplcache-contents*
 
 Introduction		|neocomplcache-introduction|
+Install			|neocomplcache-install|
 Interface		|neocomplcache-interface|
   Commands		  |neocomplcache-commands|
   Variables		  |neocomplcache-variables|
   Key mappings		  |neocomplcache-key-mappings|
 Examples		|neocomplcache-examples|
 Plugins			|neocomplcache-plugins|
+  User plugins		  |neocomplcache-user-plugins|
 Snippet			|neocomplcache-snippet|
 Create plugin		|neocomplcache-create-plugin|
+Unite sources		|neocomplcache-unite-sources|
 Changelog		|neocomplcache-changelog|
 
 ==============================================================================
@@ -47,6 +50,31 @@ INTRODUCTION						*neocomplcache-introduction*
 neocomplcache Ver.5では、かなりの変数名が変更されているため、後方互換性がなくな
 っている。移行の際には、thinca氏の作成した次のスクリプトを利用すると良いだろう。
 http://gist.github.com/422503
+
+neocomplcacheの導入については、yuitowest氏の作成したこの記事を参考にすると良い
+だろう。
+http://d.hatena.ne.jp/yuitowest/20100907/1283865197
+この記事はVer.5.1対応だが、Ver.5.2でもインストール方法はそれほど変わらない。
+
+==============================================================================
+INSTALL							*neocomplcache-install*
+
+1: 配布ファイルを解凍し、Vimスクリプトのディレクトリへインストールする
+   (普通は ~/.vim/ またはWindowsの場合、 $HOME/vimfiles)
+2: neocomplcacheはデフォルトで無効化されている。有効にするためには、
+|:NeoComplCacheEnable|コマンドを実行するか、
+let g:neocomplcache_enable_at_startup = 1 を.vimrc内に記述する。
+
+							*neocomplcache-asyncronous*
+neocomplcache Ver.6.0より、|vimproc|をインストールすれば、非同期にキャッシュ
+を行えるように変更された。|vimproc|がインストールされていない場合、従来通り
+の挙動を示す。
+vimprocの配布先は次の通りである。
+
+http://github.com/Shougo/vimshell/tree/master
+
+vimprocを使用するためには、バイナリをコンパイルしなければならない。
+コンパイル方法については、vimprocのヘルプを参照せよ。
 
 ==============================================================================
 INTERFACE						*neocomplcache-interface*
@@ -65,7 +93,7 @@ COMMANDS 						*neocomplcache-commands*
 		neocomplcacheのロック状態を切り替える。
 		ロックしている間は自動補完ができなくなる。
 
-:Neco 							*:Neco*
+:Neco [{anim-number}] 					*:Neco*
 		？？？
 
 :NeoComplCacheLock					*:NeoComplCacheLock*
@@ -74,7 +102,7 @@ COMMANDS 						*neocomplcache-commands*
 		一時的に無効にしたい場合に有効。 ロック状態はバッファローカ
 		ルである。
 
-:NeoComplCacheUnLock					*:NeoComplCacheUnLock*
+:NeoComplCacheUnlock					*:NeoComplCacheUnlock*
 		自動補完にかけたロックを解除する。
 
 :NeoComplCacheAutoCompletionLength			*:NeoComplCacheAutoCompletionLength*
@@ -97,6 +125,11 @@ COMMANDS 						*neocomplcache-commands*
 		[bufname]のタグをキャッシュする。 [bufname]を省略すると、カ
 		レントバッファのファイルタイプを指定したことになる。 これを
 		実行しなければ、tags_completeは動作しない。
+
+:NeoComplCacheCachingInclude [bufname]			*:NeoComplCacheCachingInclude*
+		[bufname]のインクルードファイルを再キャッシュする。 [bufname]を
+		省略すると、カレントバッファのファイルタイプを指定したことにな
+		る。
 
 :NeoComplCacheDisableCaching [bufname]			*:NeoComplCacheDisableCaching*
 		[bufname]で示されるバッファをキャッシュしないようにする。 バッ
@@ -138,11 +171,6 @@ COMMANDS 						*neocomplcache-commands*
 		成される。 このコマンドでは、neocomplcacheに付属するスニペッ
 		ト補完ファイルを編集する。 スニペット補完ファイルを保存する
 		と、自動的に再キャッシュされる。
-
-:NeoComplCachePrintSnippets [filetype]			*:NeoComplCachePrintSnippets*
-		[filetype]のスニペットをすべて表示する。 [filetype]を省略す
-		ると、カレントバッファのファイルタイプを指定したことになる。
-		スニペットの名前を忘れてしまったときに便利であろう。
 
 ------------------------------------------------------------------------------
 VARIABLES 						*neocomplcache-variables*
@@ -242,6 +270,12 @@ g:neocomplcache_enable_auto_select			*g:neocomplcache_enable_auto_select*
 		
 		初期値は0である。
 
+g:neocomplcache_enable_auto_delimiter			*g:neocomplcache_enable_auto_delimiter*
+		neocomplcacheが補完時に自動でデリミタを補完するかどうかを制御す
+		る。デリミタとは、ファイル名補完での /やVim scriptでの#である。
+		
+		初期値は0である。
+
 g:neocomplcache_cursor_hold_i_time			*g:neocomplcache_cursor_hold_i_time*
 		|g:neocomplcache_enable_cursor_hold_i|が有効になっている場合、
 		自動補完を開始するための計算時間を定義する。このオプションは
@@ -264,10 +298,10 @@ g:neocomplcache_enable_underbar_completion		*g:neocomplcache_enable_underbar_com
 		
 		副作用があるので、初期値は0となっている。
 
-g:neocomplcache_enable_display_parameter		*g:neocomplcache_enable_display_parameter*
-		入力中に、関数のプロトタイプをCommand-lineに表示するかを制御
-		する。 現在はvim_completeのみ対応している。
-	
+g:neocomplcache_enable_caching_message			*g:neocomplcache_enable_caching_message*
+		キャッシュ中に、メッセージをCommand-lineに表示するかを制御
+		する。
+		
 		初期値は1である。
 
 g:neocomplcache_caching_limit_file_size			*g:neocomplcache_caching_limit_file_size*
@@ -276,15 +310,29 @@ g:neocomplcache_caching_limit_file_size			*g:neocomplcache_caching_limit_file_si
 		
 		初期値は500000となっている。
 
-g:neocomplcache_disable_caching_buffer_name_pattern	*g:neocomplcache_disable_caching_buffer_name_pattern*
-		キャッシュしないバッファ名のパターンを正規表現で設定する。空
-		文字列だと無効になる。
+g:neocomplcache_disable_caching_file_path_pattern	*g:neocomplcache_disable_caching_file_path_pattern*
+		キャッシュを保存しないバッファのファイルパスのパターンを正規表
+		現で設定する。空文字列だと無視される。
 		
 		初期値は空となっている。
 
 g:neocomplcache_lock_buffer_name_pattern		*g:neocomplcache_lock_buffer_name_pattern*
-		バッファをキャッシュしないバッファ名のパターンを正規表現で設
-		定する。 空文字列だと無効になる。
+		neocomplcacheの自動補完を無効化するバッファ名のパターンを正規表
+		現で設定する。空文字列だと無視される。
+		
+		初期値は空となっている。
+
+g:neocomplcache_force_caching_buffer_name_pattern	*g:neocomplcache_force_caching_buffer_name_pattern*
+		neocomplcacheが'readonly'や'nomodifiable'を無視して強制的にキャ
+		ッシュするバッファ名のパターンを正規表現で設定する。空文字列だ
+		と無視される。
+		
+		初期値は空となっている。
+
+g:neocomplcache_disable_auto_select_buffer_name_pattern	*g:neocomplcache_disable_auto_select_buffer_name_pattern*
+		|g:neocomplcache_enable_auto_select|による候補の自動選択を無効
+		化するバッファ名のパターンを正規表現で設定する。空文字列だと無
+		視される。
 		
 		初期値は空となっている。
 
@@ -326,8 +374,8 @@ g:neocomplcache_next_keyword_patterns			*g:neocomplcache_next_keyword_patterns*
 g:neocomplcache_omni_patterns				*g:neocomplcache_omni_patterns*
 		オムニ補完するためのキーワードパターンを記録する。これはファ
 		イルタイプ毎に正規表現で指定されている。これが定義されていない場合、
-		自動補完ではオムニ補完がよばれない。Rubyのオムニ補完等は重い
-		ので、ほとんどのオムニ補完の呼び出しは無効化されている。
+		自動補完ではオムニ補完がよばれない。RubyやPHPのオムニ補完は重い
+		ので、パターンは無効化されている。
 		
 		
 		初期値は複雑なので、autoload/neocomplcache/sources/omni_complete.vimの
@@ -338,6 +386,9 @@ g:neocomplcache_omni_patterns				*g:neocomplcache_omni_patterns*
 		let g:neocomplcache_omni_patterns = {}
 		endif
 		let g:neocomplcache_omni_patterns.ruby = '[^. *\t]\.\w*\|\h\w*::'
+		let g:neocomplcache_omni_patterns.php = '[^. \t]->\h\w*\|\h\w*::'
+		let g:neocomplcache_omni_patterns.c = '\%(\.\|->\)\h\w*'
+		let g:neocomplcache_omni_patterns.cpp = '\h\w*\%(\.\|->\)\h\w*\|\h\w*::'
 <
 g:neocomplcache_tags_filter_patterns			*g:neocomplcache_tags_filter_patterns*
 		タグ補完時の候補をフィルタするパターンを記録する。
@@ -429,8 +480,9 @@ g:neocomplcache_include_patterns			*g:neocomplcache_include_patterns*
 		s:source.initialize()を参照せよ。
                 
 g:neocomplcache_member_prefix_patterns			*g:neocomplcache_member_prefix_patterns*
-		include_completeやtags_completeでメンバ補完するためのキーワー
-		ドパターンを記録する。これはファイルタイプ毎に正規表現で指定
+		include_completeやtags_complete,
+		buffer_completeがメンバを認識するための
+		パターンを記録する。これはファイルタイプ毎に正規表現で指定
 		されている。
 		
 		初期値は複雑なので、autoload/neocomplcache.vimのneocomplcache#enable()を参照せよ。
@@ -507,13 +559,26 @@ KEY MAPPINGS 						*neocomplcache-key-mappings*
 
 <Plug>(neocomplcache_snippets_expand)			*<Plug>(neocomplcache_snippets_expand)*
 		カーソル位置にあるスニペットを展開する。スニペットが存在しな
-		いとき、次のプレースホルダにジャンプする。 展開したスニペッ
-		トはランクが上昇するため、上位に表示されやすくなる。
+		いとき、次のプレースホルダにジャンプする。スニペットは
+		neocomplcacheのキーワードパターンで示されるもののみを認識す
+		る。
+		デフォルトではマッピングされていない。
 
 <Plug>(neocomplcache_snippets_jump)			*<Plug>(neocomplcache_snippets_jump)*
+		次のプレースホルダにジャンプする。プレースホルダが存在しない
+		とき、カーソル位置にあるスニペットを展開する。
+		デフォルトではマッピングされていない。
+
+<Plug>(neocomplcache_snippets_force_expand)		*<Plug>(neocomplcache_snippets_force_expand)*
+		カーソル位置にあるスニペットを展開する。スニペットが存在しな
+		いときは無視される。
+		デフォルトではマッピングされていない。
+
+<Plug>(neocomplcache_snippets_force_jump)		*<Plug>(neocomplcache_snippets_force_jump)*
 		次のプレースホルダにジャンプする。スニペットの展開は行わない。
 		スニペット名を展開したくないときに使う。
-                
+		デフォルトではマッピングされていない。
+
 neocomplcache#manual_filename_complete()		*neocomplcache#manual_filename_complete()*
 		inoremap <expr>上で使用する。neocomplcacheのファイル名補完を
 		手動で呼び出す。 Vim標準のファイル名補完を置き換えるときに使
@@ -551,7 +616,7 @@ neocomplcache#smart_close_popup()			*neocomplcache#smart_close_popup()*
 		|neocomplcache#close_popup()|とは違い、
 		|g:neocomplcache_enable_auto_select|によって挙動を賢く変化させる。
 
-neocomplcache#undo_completion				*neocomplcache#undo_completion()*
+neocomplcache#undo_completion()				*neocomplcache#undo_completion()*
 		inoremap <expr>上で使用する。neocomplcacheによって補完した候
 		補を元に戻す。 Vimには確定した補完をキャンセルする機構がない
 		ため、活用すると便利であろう。
@@ -573,13 +638,24 @@ neocomplcache#sources#snippets_complete#expandable()	*neocomplcache#sources#snip
 		0 : 見つからない
 		1 : カーソル位置にスニペットのトリガーがある
 		2 : カレントバッファにスニペットのプレースホルダーを発見した
+		3 : どちらも発見した
 >
 		imap <expr><C-l>    neocomplcache#snippets_complete#expandable() ? "\<Plug>(neocomplcache_snippets_expand)" : "\<C-n>"
 <
+<Plug>(neocomplcache_start_unite_complete)		*<Plug>(neocomplcache_start_unite_complete)*
+		|unite|による補完インタフェースを使用する。この機能はまだ実
+		験段階である。手動補完を置き換えることができると思われるが、
+		デフォルトではマッピングされていない。
+
+<Plug>(neocomplcache_start_unite_snippet)		*<Plug>(neocomplcache_start_unite_snippet)*
+		|unite|による補完インタフェースを使用して、スニペットのリス
+		トを参照する。この機能はまだ実験段階である。
+
 ==============================================================================
 EXAMPLES						*neocomplcache-examples*
 
-doc/neocomplcache.txtを参照せよ。
+doc/neocomplcache.txt(英語ヘルプ)の|neocomplcache-examples|を参照せよ。
+これは作者が普段使っている設定を基にしている。
 
 ==============================================================================
 PLUGINS							*neocomplcache-plugins*
@@ -609,38 +685,64 @@ tags_complete.vim					*tags_complete*
 		ルード補完を使用するべきである。
 
 syntax_complete.vim					*syntax_complete*
-		標準で提供されているautoload/syntaxcomplete.vimのように、 シ
-		ンタックスファイルを解析し、補完候補に加えるプラグイン。
+		標準で提供されているautoload/syntaxcomplete.vimのように、シン
+		タックスファイルを解析し、補完候補に加えるプラグイン。
 		autoload/syntaxcomplete.vimよりもたくさんの候補を認識できる。
 
 include_complete.vim					*include_complete*
-		開いているバッファを解析し、参照しているファイルを自動的に候
-		補に加えるプラグイン。 いちいちタグファイルや辞書ファイルを
-		用意しなくて良いので便利である。 ただし、'path'や'include',
+		開いているバッファを解析し、参照しているファイルを自動的に候補
+		に加えるプラグイン。 いちいちタグファイルや辞書ファイルを用意し
+		なくて良いので便利である。 ただし、'path'や'include',
 		'includeexpr'が適切に設定されている必要がある。
                 
 vim_complete.vim					*vim_complete*
-		実験的機能。文脈を解析し、VimScriptのオムニ補完を行う。
+		文脈を解析し、VimScriptのオムニ補完を行う。
 		VimScriptの編集時以外では動作しない。 neocomplcacheからは
-		|i_CTRL-X_CTRL-V|が呼び出せないため作られた。 標準で用意され
-		ている補完よりも、高機能なものにすることが目標である。 現在、
+		|i_CTRL-X_CTRL-V|が呼び出せないため作られた。 現在、
 		ローカル変数やスクリプト変数、関数やコマンドの解析が実装され
 		ている。
 
 dictionary_complete.vim					*dictionary_complete*
-		
+		'dictionary'または|g:neocomplcache_dictionary_filetype_lists|
+		から候補を収集し、補完候補に加えるプラグインである。
 
 filename_complete.vim					*filename_complete*
-		
+		このプラグインはファイル名を補完候補に加える。ヘッダーファイル
+		の補完などで便利であろう。このプラグインはinclude_completeと
+		同様に、インクルードパスやインクルードパターンを適切に判断す
+		る。
 
 omni_complete.vim					*omni_complete*
-		
+		このプラグインはカーソルが|g:neocomplcache_omni_patterns|にマッ
+		チする場合、'omnifunc'を自動的に呼び出す。
+		|g:neocomplcache_omni_function_list|が定義されている場合、そち
+		らが優先される。
 
 completefunc_complete.vim				*completefunc_complete*
-		
+		任意の補完関数から補完候補を収集するためのプラグインだが、未完
+		成である。 現在、補完関数を手動で呼び出すための
+		neocomplcache#sources#completefunc_complete#call_completefunc(funcname)
+		のみが使用できる。
 
 abbrev_complete.vim					*abbrev_complete*
-		
+		abbrevから補完候補を収集するプラグインである。Vimではabbrevがあ
+		まり使われないため、ほとんど使用することはないと思われる。
+
+------------------------------------------------------------------------------
+USER PLUGINS 						*neocomplcache-user-plugins*
+
+ここではneocomplcacheに添付されていない、非標準のプラグインを紹介する。
+
+neco-ghc						*neocomplcache-plugins-neco-ghc*
+		https://github.com/ujihisa/neco-ghc
+		eagletmt氏が作成し、ujihisa氏がメンテナンスをしている。
+		Haskellのソースファイルを補完できるが、動作には
+		ghc-mod <http://www.mew.org/~kazu/proj/ghc-mod/>が必要である。
+
+neco-ruby						*neocomplcache-plugins-neco-ruby*
+		https://github.com/ujihisa/neco-ruby
+		Ruby用の補完プラグインである。作者はujihisa氏。現在、require_relative
+		の補完ができる。
 
 ==============================================================================
 SNIPPET							*neocomplcache-snippet-completion*
@@ -667,9 +769,30 @@ neocomplcacheではスニペット機能を内蔵している。 スニペット
 ルを参照せよ。 最近のsnipMateではシンタックスファイルが付属しているが、
 neocomplcacheが使用しているものの方が高機能なので、そちらを利用したほうがよい。
 
+
+スニペット名として使用できる単語は、|g:neocomplcache_keyword_patterns|で表され
+るキーワードのパターンか、カーソル以前の非空白文字である。ただし、キーワードパ
+ターンに含まれない記号を用いると、snippets_completeによる補完ができない点には注
+意が必要である。ちなみに、キーワードパターンにマッチするスニペット名が優先して
+展開される。カーソル前の文字列がAA-BBの場合に展開されるスニペットはAA-BBではな
+く、BBである。
+
+
+ちなみに、同じスニペットファイルにそのスニペット名がすでに定義されていると警告される。
+スニペットを明示的に上書きしたい場合は、
+>
+	delete snippets_name
+<
+してから、snippet文でもう一度定義すると良い。
+外部ファイルをインクルードした場合や、他のスニペットファイルのスニペットを上
+書きしても警告は出ない。
+
+
 snipMateと違って、外部スニペットのインクルードも使える。
-	include c
-例えばこのように記述すると、そのスニペットファイルにc用のス ニペットを加えて
+>
+	include c.snip
+<
+例えばこのように記述すると、そのスニペットファイルにc用のスニペットを加えて
 補完候補とする。 共通部分を補完するのに便利である。 ただし再帰的処理を行っ
 ているので、無限ループに陥らないように注意する必要がある。
 
@@ -682,17 +805,20 @@ snipMateのように、``を用いたevalも動作する。
 例えばこのように記述すると、現在開いているバッファ名を補完できる。 ただし
 補完候補を展開するときに評価を行うため、副作用には十分注意しなければならない。
 
+
 簡単にスニペットファイルを編集できるように、 |:NeoComplCacheEditSnippets|と
-いうコマンドを用意いる。 このコマンドを用いると、filetypeのスニペット
+いうコマンドを用意している。 このコマンドを用いると、filetypeのスニペット
 補完ファイルを簡単に編集することができる。 filetypeを省略すると、
 &filetypeとなる。保存すると自動的に再キャッシュされるので、さらに便利である。
+
+
+neocomplcacheは自動的にスニペット展開用のキーをマッピングすることはないため、
+スニペットを展開するためには、以下のようなキーマッピングを定義しなければなら
+ない。
 >
 	imap <C-l>    <Plug>(neocomplcache_snippets_expand)
 	smap <C-l>    <Plug>(neocomplcache_snippets_expand)
 <
-のようにplugin keymappingを定義しておけば、<C-l>でスニペットを展開できる。
-展開時にインデントもきちんとなされる。
-
 snipMate風のプレースホルダにも対応している。
 >
 	snippet     if
@@ -708,16 +834,21 @@ ${1}が最初に入力する単語である。スニペットの展開時に自�
 スニペットの中でスニペットを補完したりといった複雑な場合も、ある程度直感的
 に動作するようになっている。 プレースホルダはソースコード中でも色分けされる。
 
+
 vnoremapやvmap, mapはselect modeでも有効になるので、変なマッピングをしてい
 ると、デフォルト値の選択時に上手く文字が入力できなくなる。 .vimrcにその
 ような記述があれば、xnoremapやxmapに修正するべきである。
 
+
 ユーザが定義するスニペットの保存場所は自由に指定できる。
 指定するときは、
+>
 	let g:neocomplcache_snippets_dir = $HOME.'/snippets'
+<
 のように.vimrcに記述する。
 |:NeoComplCacheEditSnippets|では、|g:neocomplcache_snippets_dir|を優先して読
 み込む。
+
 
 展開可能かどうかを判断する関数として、
 |neocomplcache#snippets_complete#expandable()|を追加した。 これを使えば、
@@ -725,49 +856,55 @@ vnoremapやvmap, mapはselect modeでも有効になるので、変なマッピ�
 のように設定でき、展開可能でない場合は他の機能にキーバインドを割り当てること
 が出来る。
 
+
 複数回展開が必要なスニペットは表示が変わり、[Snippet]が<Snippet>に変化する。
 
-スニペット名が同じスニペットを定義した場合、上書きされる。
-インクルードしたスニペットや標準のスニペットを書き換えるときに便利である。
 
 どのファイルタイプでも読み込まれる、'_.snip'がある。
-さらに、snipMate形式のスニペットファイルもそのまま読み込めます。
+さらに、snipMate形式のスニペットファイルもそのまま読み込める。
 
-alias hoge hogera hogehoge
-のように空白もしくは, で区切って指定すると、スニペットの別名定義ができる。
+
+下のように空白もしくは, で区切って指定すると、スニペットの別名定義ができる。
 スニペット名を直接入力するときに、覚えることが簡単になるので便利である。
+>
+	alias hoge hogera hogehoge
+<
 
 プレースホルダの同期も実装されている。 ${1}は$1のプレースホルダに同期さ
 れる。 snipMateのスニペットとの互換性も高い。 即座に同期され
-るsnipMateと違い、次にジャンプするときに同期されるので注意が必要。 同期させる値に
-は改行を含ませることはできないことにも注意。 ${0}は最後に展開さ
+るsnipMateと違い、次にジャンプするときに同期されるので注意が必要。${0}は最後に展開さ
 れるので、最後に入力する部分に指定すると良い。
 
-スニペットの一覧を表示するには|:NeoComplCachePrintSnippets|コマンドを実行する。
-スニペットを忘れたときに便利。
+
+プレースホルダの値には改行を含ませることはできない。以下のスニペットは不正である。
+>
+	snippet test
+		${1:constructor: (${2:args\}) ->
+			${3:# do smth}}
+<
+
+snipMateのmulti snippetにも対応している。
 >
 	snippet ${1:trigger} ${2:description}
 	${3}
 <
-で表される、snipMateのmulti snippetにも対応。
-スニペット補完はSame filetypeにも対応している。
+
+プレースホルダの中にプレースホルダを書くことができる。ただ し、'}'はエスケー
+プしなればならない。 '\'がエスケープ文字になっている。
 >
 	snippet div
 	<div ${1:id="${2:someid\}"}>${3}</div>${4}
 <
-プレースホルダの中にプレースホルダを書くことができる。ただ し、}はエスケー
-プしなればならない。 \がエスケープ文字になっているので、\を初期値に入れるとき
-は\\とする必要がある。
+
+ハードタブを使ってインデントすると、 indent pluginの設定を使わず
+にインデントを復元する。 phpなど、indent pluginが非力な言語を使うときに便
+利である。snipMateはハードタブ固定なので、互換性も上がっている。
 >
 	snippet if
 		if (${1:/* condition */}) {
 			${2:// code...}
 		}
 <
-このように、ハードタブを使ってインデントすると、 indent pluginの設定を使わず
-にインデントを復元する。 phpなど、indent pluginが非力な言語を使うときに便
-利である。snipMateはハードタブ固定なので、互換性も上がっている。
-
 ==============================================================================
 CREATE PLUGIN					*neocomplcache-create-plugin*
 
@@ -775,9 +912,41 @@ CREATE PLUGIN					*neocomplcache-create-plugin*
 インを自作することで、neocomplcacheの能力は無限大に広がるだろう。
 
 ==============================================================================
+UNITE SOURCES						*neocomplcache-unite-sources*
+
+ここでは、neocomplcacheに添付されている、|unite|用sourceについて解説を行なう。
+
+							*neocomplcache-unite-source-neocomplcache*
+neocomplcache
+		neocomplcacheの補完候補を候補とする。候補はcompletion kindで
+		ある。普通、mapping内で
+		|<Plug>(neocomplcache_start_unite_complete)|をマッピングして
+		使用する。
+		例：
+>
+		imap <C-k>  <Plug>(neocomplcache_start_unite_complete)
+<
+							*neocomplcache-unite-source-snippet*
+snippet
+		neocomplcacheのsnippetを候補とする。候補はcompletion kindで
+		ある。普通、mapping内で
+		|<Plug>(neocomplcache_start_unite_snippet)|をマッピングして
+		使用する。
+		例：
+>
+		imap <C-s>  <Plug>(neocomplcache_start_unite_complete)
+<
+
+source別アクション
+
+snippet							*neocomplcache-unite-action-snippet*
+	expand		スニペットの展開(デフォルト)
+	preview		スニペットの定義を見る
+
+==============================================================================
 CHANGELOG					*neocomplcache-changelog*
 
 doc/neocomplcache.txtを参照せよ。
 
 ==============================================================================
-vim:tw=78:ts=8:ft=help:norl:noet:fen:fdl=0:fdm=marker:
+vim:tw=78:ts=8:ft=help:norl:noet:fen:fdl=0:

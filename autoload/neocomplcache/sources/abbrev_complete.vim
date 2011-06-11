@@ -1,7 +1,7 @@
 "=============================================================================
 " FILE: abbrev_complete.vim
 " AUTHOR:  Shougo Matsushita <Shougo.Matsu@gmail.com>
-" Last Modified: 10 Jun 2010
+" Last Modified: 17 Aug 2010
 " License: MIT license  {{{
 "     Permission is hereby granted, free of charge, to any person obtaining
 "     a copy of this software and associated documentation files (the
@@ -24,6 +24,9 @@
 " }}}
 "=============================================================================
 
+let s:save_cpo = &cpo
+set cpo&vim
+
 let s:source = {
       \ 'name' : 'abbrev_complete',
       \ 'kind' : 'plugin',
@@ -38,6 +41,7 @@ endfunction"}}}
 
 function! s:source.get_keyword_list(cur_keyword_str)"{{{
   " Get current abbrev list.
+  let l:abbrev_list = ''
   redir => l:abbrev_list
   silent! iabbrev
   redir END
@@ -46,7 +50,7 @@ function! s:source.get_keyword_list(cur_keyword_str)"{{{
   for l:line in split(l:abbrev_list, '\n')
     let l:abbrev = split(l:line)
 
-    if l:abbrev[0] !~ '^[!ac]$'
+    if l:abbrev[0] !~ '^[!i]$'
       " No abbreviation found.
       return []
     endif
@@ -55,10 +59,14 @@ function! s:source.get_keyword_list(cur_keyword_str)"{{{
           \{ 'word' : l:abbrev[1], 'menu' : printf('[A] %.'. g:neocomplcache_max_filename_width.'s', l:abbrev[2]) })
   endfor
 
-  return l:list
+  return neocomplcache#keyword_filter(l:list, a:cur_keyword_str)
 endfunction"}}}
 
 function! neocomplcache#sources#abbrev_complete#define()"{{{
   return s:source
 endfunction"}}}
+
+let &cpo = s:save_cpo
+unlet s:save_cpo
+
 " vim: foldmethod=marker

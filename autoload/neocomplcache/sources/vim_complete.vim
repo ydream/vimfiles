@@ -1,7 +1,7 @@
 "=============================================================================
 " FILE: vim_complete.vim
 " AUTHOR:  Shougo Matsushita <Shougo.Matsu@gmail.com>
-" Last Modified: 29 Jul 2010
+" Last Modified: 22 Apr 2011.
 " License: MIT license  {{{
 "     Permission is hereby granted, free of charge, to any person obtaining
 "     a copy of this software and associated documentation files (the
@@ -24,6 +24,9 @@
 " }}}
 "=============================================================================
 
+let s:save_cpo = &cpo
+set cpo&vim
+
 let s:source = {
       \ 'name' : 'vim_complete',
       \ 'kind' : 'ftplugin',
@@ -32,8 +35,6 @@ let s:source = {
 
 function! s:source.initialize()"{{{
   " Initialize.
-  let s:completion_length = has_key(g:neocomplcache_plugin_completion_length, 'vim_complete') ? 
-        \ g:neocomplcache_plugin_completion_length['vim_complete'] : g:neocomplcache_auto_completion_start_length
 
   " Initialize complete function list."{{{
   if !exists('g:neocomplcache_vim_completefuncs')
@@ -43,12 +44,11 @@ function! s:source.initialize()"{{{
 
   " Set rank.
   call neocomplcache#set_dictionary_helper(g:neocomplcache_plugin_rank, 'vim_complete', 100)
-  
-  " Set completion length.
-  call neocomplcache#set_completion_length('vim_complete', 1)
-  
+
   " Call caching event.
   autocmd neocomplcache FileType * call neocomplcache#sources#vim_complete#helper#on_filetype()
+
+  " Initialize check.
   call neocomplcache#sources#vim_complete#helper#on_filetype()
 
   " Add command.
@@ -57,6 +57,10 @@ endfunction"}}}
 
 function! s:source.finalize()"{{{
   delcommand NeoComplCacheCachingVim
+  
+  if neocomplcache#exists_echodoc()
+    call echodoc#unregister('vim_complete')
+  endif
 endfunction"}}}
 
 function! s:source.get_keyword_pos(cur_text)"{{{
@@ -71,7 +75,7 @@ function! s:source.get_keyword_pos(cur_text)"{{{
     return -1
   endif
 
-  let l:pattern = '\.\%(\h\w*\%(()\?\)\?\)\?\|' . neocomplcache#get_keyword_pattern_end('vim')
+  let l:pattern = '\.\%(\h\w*\)\?$\|' . neocomplcache#get_keyword_pattern_end('vim')
   if l:cur_text !~ '^[[:digit:],[:space:]$''<>]*\h\w*$'
     let l:command_completion = neocomplcache#sources#vim_complete#helper#get_completion_name(
           \neocomplcache#sources#vim_complete#get_command(l:cur_text))
@@ -79,7 +83,7 @@ function! s:source.get_keyword_pos(cur_text)"{{{
       let l:pattern = neocomplcache#get_keyword_pattern_end('filename')
     endif
   endif
-  
+
   let [l:cur_keyword_pos, l:cur_keyword_str] = neocomplcache#match_word(a:cur_text, l:pattern)
 
   return l:cur_keyword_pos
@@ -87,23 +91,33 @@ endfunction"}}}
 
 function! s:source.get_complete_words(cur_keyword_pos, cur_keyword_str)"{{{
   let l:cur_text = neocomplcache#sources#vim_complete#get_cur_text()
-  if (neocomplcache#is_auto_complete() && l:cur_text !~ '\h\w*\.\%(\h\w*\%(()\?\)\?\)\?$'
-        \&& len(a:cur_keyword_str) < s:completion_length)
+  if (neocomplcache#is_auto_complete() && l:cur_text !~ '\h\w*\.\%(\h\w*\)\?$'
+        \&& len(a:cur_keyword_str) < g:neocomplcache_auto_completion_start_length)
     return []
   endif
-  
-  if l:cur_text =~ '\h\w*\.\%(\h\w*\%(()\?\)\?\)\?$' && a:cur_keyword_str=~ '^\.'
+
+  if l:cur_text =~ '\h\w*\.\%(\h\w*\)\?$'
     " Dictionary.
-    let l:list = neocomplcache#sources#vim_complete#helper#var_dictionary(l:cur_text, a:cur_keyword_str)
+    let l:cur_keyword_str = matchstr(l:cur_text, '.\%(\h\w*\)\?$')
+    let l:list = neocomplcache#sources#vim_complete#helper#var_dictionary(l:cur_text, l:cur_keyword_str)
+    return neocomplcache#keyword_filter(l:list, l:cur_keyword_str)
   elseif a:cur_keyword_str =~# '^&\%([gl]:\)\?'
     " Options.
     let l:prefix = matchstr(a:cur_keyword_str, '&\%([gl]:\)\?')
-    let l:options = deepcopy(neocomplcache#sources#vim_complete#helper#option(l:cur_text, a:cur_keyword_str))
-    for l:keyword in l:options
+    let l:list = deepcopy(neocomplcache#sources#vim_complete#helper#option(l:cur_text, a:cur_keyword_str))
+    for l:keyword in l:list
       let l:keyword.word = l:prefix . l:keyword.word
       let l:keyword.abbr = l:prefix . l:keyword.abbr
     endfor
-    let l:list = l:options
+  elseif a:cur_keyword_str =~? '^\c<sid>'
+    " SID functions.
+    let l:prefix = matchstr(a:cur_keyword_str, '^\c<sid>')
+    let l:cur_keyword_str = substitute(a:cur_keyword_str, '^\c<sid>', 's:', '')
+    let l:list = deepcopy(neocomplcache#sources#vim_complete#helper#function(l:cur_text, l:cur_keyword_str))
+    for l:keyword in l:list
+      let l:keyword.word = l:prefix . l:keyword.word[2:]
+      let l:keyword.abbr = l:prefix . l:keyword.abbr[2:]
+    endfor
   elseif l:cur_text =~# '\<has([''"]\w*$'
     " Features.
     let l:list = neocomplcache#sources#vim_complete#helper#feature(l:cur_text, a:cur_keyword_str)
@@ -116,36 +130,34 @@ function! s:source.get_complete_words(cur_keyword_pos, cur_keyword_str)"{{{
   elseif l:cur_text =~ '`=[^`]*$'
     " Expression.
     let l:list = neocomplcache#sources#vim_complete#helper#expression(l:cur_text, a:cur_keyword_str)
-  else
-    if l:cur_text =~ '^[[:digit:],[:space:]$''<>]*!\s*\f\+$'
-      " Shell commands.
-      let l:list = neocomplcache#sources#vim_complete#helper#shellcmd(l:cur_text, a:cur_keyword_str)
-    elseif l:cur_text =~ '^[[:digit:],[:space:]$''<>]*\h\w*$'
-      " Commands.
-      let l:list = neocomplcache#sources#vim_complete#helper#command(l:cur_text, a:cur_keyword_str)
-      if bufname('%') ==# '[Command Line]'
-        let l:ret = []
-        " Use ambiguous filter.
-        for pat in [
-              \ '^'.a:cur_keyword_str,
-              \ '\C^' . substitute(toupper(a:cur_keyword_str), '.', '\0\\l*', 'g') . '$',
-              \ '\C' . substitute(toupper(a:cur_keyword_str), '.', '\0\\l*', 'g')]
-          let l:ret += filter(copy(l:list), 'v:val.word =~? ' . string(pat))
-        endfor
-        call neocomplcache#used_match_filter()
+  elseif l:cur_text =~ '^[[:digit:],[:space:]$''<>]*!\s*\f\+$'
+    " Shell commands.
+    let l:list = neocomplcache#sources#vim_complete#helper#shellcmd(l:cur_text, a:cur_keyword_str)
+  elseif l:cur_text =~ '^[[:digit:],[:space:]$''<>]*\h\w*$'
+    " Commands.
+    let l:list = neocomplcache#sources#vim_complete#helper#command(l:cur_text, a:cur_keyword_str)
+    if bufname('%') ==# '[Command Line]'
+      let l:ret = []
+      " Use ambiguous filter.
+      for pat in [
+            \ '^'.a:cur_keyword_str,
+            \ '\C^' . substitute(toupper(a:cur_keyword_str), '.', '\0\\l*', 'g') . '$',
+            \ '\C' . substitute(toupper(a:cur_keyword_str), '.', '\0\\l*', 'g')]
+        let l:ret += filter(copy(l:list), 'v:val.word =~? ' . string(pat))
+      endfor
+      call neocomplcache#used_match_filter()
 
-        return l:ret
-      endif
-    else
-      " Commands args.
-      
-      let l:command = neocomplcache#sources#vim_complete#get_command(l:cur_text)
-      let l:list = neocomplcache#sources#vim_complete#helper#get_command_completion(l:command, l:cur_text, a:cur_keyword_str)
-      
-      if l:cur_text =~ '[[(,{]'
-        " Expression.
-        let l:list += neocomplcache#sources#vim_complete#helper#expression(l:cur_text, a:cur_keyword_str)
-      endif
+      return l:ret
+    endif
+  else
+    " Commands args.
+
+    let l:command = neocomplcache#sources#vim_complete#get_command(l:cur_text)
+    let l:list = neocomplcache#sources#vim_complete#helper#get_command_completion(l:command, l:cur_text, a:cur_keyword_str)
+
+    if l:cur_text =~ '[[(,{]'
+      " Expression.
+      let l:list += neocomplcache#sources#vim_complete#helper#expression(l:cur_text, a:cur_keyword_str)
     endif
   endif
 
@@ -161,7 +173,7 @@ function! neocomplcache#sources#vim_complete#get_cur_text()"{{{
   if &filetype == 'vimshell' && exists('*vimshell#get_secondary_prompt')
     return l:cur_text[len(vimshell#get_secondary_prompt()) :]
   endif
-  
+
   let l:line = line('.')
   let l:cnt = 0
   while l:cur_text =~ '^\s*\\' && l:line > 1 && l:cnt < 5
@@ -175,5 +187,8 @@ endfunction"}}}
 function! neocomplcache#sources#vim_complete#get_command(cur_text)"{{{
   return matchstr(a:cur_text, '\<\%(\d\+\)\?\zs\h\w*\ze!\?\|\<\%([[:digit:],[:space:]$''<>]\+\)\?\zs\h\w*\ze/.*')
 endfunction"}}}
+
+let &cpo = s:save_cpo
+unlet s:save_cpo
 
 " vim: foldmethod=marker
